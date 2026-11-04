@@ -1,0 +1,30 @@
+.bad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.5);
+}
+
+.bad-panel {
+  min-width: min(26rem, 90vw);
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border: 2px solid var(--color-header-bg);
+  border-radius: 8px;
+}
+
+.bad-panel h3 {
+  margin-top: 0;
+}
+
+/* C11: ukrycie tylko wizualne */
+.collapsed {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  opacity: 0;
+}

@@ -1,0 +1,105 @@
+<h1>Formularz – wersja poprawiona</h1>
+<p class="lead">
+  Ten sam formularz po poprawkach. Opis każdej zmiany jest na <a routerLink="/">stronie startowej</a>.
+</p>
+
+@if (summaryItems().length > 0) {
+  <div
+    #summary
+    class="error-summary"
+    role="group"
+    tabindex="-1"
+    aria-labelledby="error-summary-title"
+  >
+    <h2 id="error-summary-title">
+      {{ summaryItems().length === 1 ? 'Formularz zawiera 1 błąd' : 'Formularz zawiera błędy: ' + summaryItems().length }}
+    </h2>
+    <ul>
+      @for (item of summaryItems(); track item.id) {
+        <li><a [href]="'#' + item.id" (click)="focusField($event, item.id)">{{ item.message }}</a></li>
+      }
+    </ul>
+  </div>
+}
+
+@if (succeeded()) {
+  <div #success class="success-message" role="group" tabindex="-1" aria-labelledby="success-title">
+    <h2 id="success-title">Formularz został wysłany</h2>
+    <pre>{{ result() }}</pre>
+  </div>
+}
+
+<p class="hint">Wszystkie pola są wymagane, z wyjątkiem numeru klienta, który jest tylko do odczytu.</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2>Dane kontaktowe</h2>
+
+  <!-- #6: widoczna etykieta zamiast samego placeholdera -->
+  <app-text-field
+    label="Imię i nazwisko"
+    inputId="full-name"
+    autocomplete="name"
+    [errors]="messages['fullName']"
+    formControlName="fullName"
+  />
+
+  <!-- #4: aria-invalid + aria-describedby powiązane z komunikatem błędu -->
+  <app-text-field
+    label="Adres e-mail"
+    inputId="email"
+    type="email"
+    autocomplete="email"
+    hint="Na przykład: nazwa@domena.pl"
+    [errors]="messages['email']"
+    formControlName="email"
+  />
+
+  <app-text-field
+    label="Telefon"
+    inputId="phone"
+    type="tel"
+    autocomplete="tel"
+    [errors]="messages['phone']"
+    formControlName="phone"
+  />
+
+  <!-- #8: natywny select w środku, etykieta wskazuje na wewnętrzny element -->
+  <app-select-field
+    label="Temat"
+    inputId="topic"
+    [options]="topics"
+    [errors]="messages['topic']"
+    formControlName="topic"
+  />
+
+  <h2>Adres</h2>
+
+  <!-- #9: unikalne id dla każdego wystąpienia; #5: błąd jako tekst z ikoną -->
+  <app-text-field
+    label="Miejscowość"
+    inputId="city"
+    autocomplete="address-level2"
+    [errors]="messages['city']"
+    formControlName="city"
+  />
+  <app-text-field
+    label="Kod pocztowy"
+    inputId="postcode"
+    autocomplete="postal-code"
+    [errors]="messages['postcode']"
+    formControlName="postcode"
+  />
+
+  <!-- #7: readonly zamiast disabled -->
+  <app-text-field
+    label="Numer klienta"
+    inputId="customer-no"
+    hint="Pole tylko do odczytu."
+    [readonly]="true"
+    formControlName="customerNo"
+  />
+
+  <div class="btn-row">
+    <button type="submit" class="btn">Wyślij</button>
+  </div>
+</form>

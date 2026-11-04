@@ -1,0 +1,150 @@
+<h1>CDK A11y – wersja z błędami</h1>
+<p class="lead">
+  Ta strona zawiera <strong>celowe błędy</strong> przy obsłudze fokusu i dynamicznych zmian w DOM
+  (oznaczenia C1–C11). Opis błędów i poprawek jest na <a routerLink="/">stronie startowej</a>.
+</p>
+
+<!-- ============ 1. Dialog ============ -->
+<section aria-labelledby="s-dialog">
+  <h2 id="s-dialog">1. Dialog potwierdzenia</h2>
+  <p>Usuń plik i sprawdź, gdzie trafia fokus oraz czy dialog reaguje na Escape.</p>
+
+  <ul class="file-list">
+    @for (f of files(); track f.id) {
+      <li>
+        <span>{{ f.name }}</span>
+        <button type="button" class="btn btn-secondary" (click)="fileToDelete.set(f)">
+          Usuń<span class="visually-hidden"> {{ f.name }}</span>
+        </button>
+      </li>
+    } @empty {
+      <li>Brak plików.</li>
+    }
+  </ul>
+  <button type="button" class="btn btn-secondary" (click)="resetFiles()">Przywróć listę</button>
+
+  @if (fileToDelete(); as f) {
+    <div class="bad-overlay">
+      <!-- C1: tylko cdkTrapFocus; brak role="dialog", aria-modal, nazwy i obsługi Escape.
+           Tło pozostaje dostępne dla czytnika ekranu. -->
+      <div class="bad-panel" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+        <h3>Usunąć plik „{{ f.name }}”?</h3>
+        <div class="btn-row">
+          <button type="button" class="btn" (click)="confirmDelete()">Usuń</button>
+          <button type="button" class="btn btn-secondary" (click)="fileToDelete.set(null)">Anuluj</button>
+        </div>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- ============ 2. Menu ============ -->
+<section aria-labelledby="s-menu">
+  <h2 id="s-menu">2. Menu rozwijane</h2>
+  <p>Otwórz menu klawiaturą (Enter) i sprawdź, co dzieje się z fokusem, Tab i Escape.</p>
+
+  <div class="menu-wrap">
+    <!-- C3: brak aria-haspopup, aria-expanded i aria-controls -->
+    <button type="button" class="btn btn-secondary" (click)="toggleMenu()">Akcje ▾</button>
+    @if (menuOpen()) {
+      <!-- C3: role="menu" z elementami <li> i <button> bez ról (niepoprawna struktura) -->
+      <ul class="menu" role="menu" (keydown)="onMenuKey($event)">
+        @for (item of menuItems; track item) {
+          <li>
+            <button type="button" appFocusable (click)="chooseItem(item)">{{ item }}</button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+  @if (menuChoice()) {
+    <p class="hint">{{ menuChoice() }}</p>
+  }
+</section>
+
+<!-- ============ 3. Regiony aria-live ============ -->
+<section aria-labelledby="s-live">
+  <h2 id="s-live">3. Komunikaty i regiony aria-live</h2>
+
+  <h3>Komunikat o zapisie</h3>
+  <div class="btn-row">
+    <button type="button" class="btn" (click)="saveChanges()">Zapisz zmiany</button>
+    <button type="button" class="btn btn-secondary" (click)="clearStatus()">Wyczyść</button>
+  </div>
+  <div class="message-slot">
+    <!-- C6: cały kontener role="status" pojawia się razem z tekstem -->
+    @if (statusText()) {
+      <div role="status" class="msg">{{ statusText() }}</div>
+    }
+  </div>
+
+  <h3>Koszyk</h3>
+  <div class="btn-row">
+    <button type="button" class="btn" (click)="addToCart()">Dodaj do koszyka</button>
+  </div>
+  <!-- C7: stały region + LiveAnnouncer z tym samym tekstem = podwójne ogłoszenie -->
+  <div role="status" class="message-slot">
+    @if (cartText()) {
+      <p class="msg">{{ cartText() }}</p>
+    }
+  </div>
+
+  <h3>Wyszukiwarka</h3>
+  <div class="field">
+    <label for="fruit-search">Szukaj owoców</label>
+    <input id="fruit-search" type="text" autocomplete="off" (input)="onSearch($event)" />
+  </div>
+  <!-- C8: liczba wyników jest ogłaszana (assertive) po każdym naciśnięciu klawisza -->
+  <ul class="search-results">
+    @for (f of results(); track f) {
+      <li>{{ f }}</li>
+    }
+  </ul>
+
+  <h3>Powiadomienie (toast)</h3>
+  <div class="btn-row">
+    <button type="button" class="btn" (click)="showToast()">Zapisz szkic</button>
+  </div>
+  <div class="message-slot">
+    <!-- C6 + C9: region wstawiany z treścią; znika po 3 s i nie ma przycisku zamknięcia -->
+    @if (toast()) {
+      <div class="toast" role="status"><span>{{ toast() }}</span></div>
+    }
+  </div>
+</section>
+
+<!-- ============ 4. Lista z @for ============ -->
+<section aria-labelledby="s-list">
+  <h2 id="s-list">4. Lista zadań (fokus przy aktualizacji DOM)</h2>
+  <p>Przejdź Tab do zadania i naciśnij Enter lub spację. Sprawdź, gdzie jest fokus po zmianie.</p>
+  <ul class="task-list">
+    <!-- C10: track po tożsamości obiektu; aktualizacja tworzy nowy obiekt,
+         więc element jest niszczony i tworzony od nowa, a fokus przepada -->
+    @for (t of tasks(); track t) {
+      <li>
+        <button type="button" [attr.aria-pressed]="t.done" (click)="toggleTask(t.id)">
+          {{ t.title }}
+        </button>
+      </li>
+    }
+  </ul>
+</section>
+
+<!-- ============ 5. Ukryty panel ============ -->
+<section aria-labelledby="s-panel">
+  <h2 id="s-panel">5. Panel rozwijany</h2>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [attr.aria-expanded]="panelOpen()"
+    aria-controls="details-panel"
+    (click)="togglePanel()"
+  >
+    Szczegóły
+  </button>
+  <!-- C11: zwinięty panel jest ukryty tylko wizualnie (wysokość 0, opacity 0);
+       link w środku nadal jest dostępny z klawiatury -->
+  <div id="details-panel" class="panel" [class.collapsed]="!panelOpen()">
+    <p>Więcej informacji znajdziesz w <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener">materiałach W3C WAI</a>.</p>
+  </div>
+</section>

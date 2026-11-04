@@ -1,0 +1,23 @@
+<div class="field">
+  <label [for]="id">{{ label() }}</label>
+  @if (hint()) {
+    <p [id]="id + '-hint'" class="hint">{{ hint() }}</p>
+  }
+  <input
+    [id]="id"
+    [type]="type()"
+    [attr.autocomplete]="autocomplete() || null"
+    [readOnly]="readonly()"
+    [disabled]="disabled()"
+    [value]="value()"
+    [attr.aria-invalid]="showError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+  />
+  @if (showError()) {
+    <p [id]="id + '-error'" class="error-text">
+      <span aria-hidden="true">⚠ </span><span class="visually-hidden">Błąd: </span>{{ errorText() }}
+    </p>
+  }
+</div>

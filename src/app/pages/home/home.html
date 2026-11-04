@@ -1,0 +1,62 @@
+<h1>Błędy dostępności w aplikacjach Angular</h1>
+<p class="lead">
+  Cztery strony w parach „błędy” i „poprawki”: formularze (Reactive Forms) oraz obsługa fokusu i
+  dynamicznych zmian w DOM z Angular CDK A11y.
+</p>
+
+<ul class="page-links">
+  <li><a routerLink="/z-bledami">Formularz – błędy</a></li>
+  <li><a routerLink="/poprawiona">Formularz – poprawki</a></li>
+  <li><a routerLink="/cdk-z-bledami">CDK – błędy</a></li>
+  <li><a routerLink="/cdk-poprawiona">CDK – poprawki</a></li>
+</ul>
+
+<h2>Formularze: mapa błędów i poprawek</h2>
+<table>
+  <caption class="visually-hidden">Błędy dostępności, miejsce wystąpienia i sposób poprawienia</caption>
+  <thead>
+    <tr>
+      <th scope="col">Nr</th>
+      <th scope="col">Błąd</th>
+      <th scope="col">WCAG</th>
+      <th scope="col">Gdzie w wersji z błędami</th>
+      <th scope="col">Jak poprawiono</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows; track row.no) {
+      <tr>
+        <th scope="row">{{ row.no }}</th>
+        <td>{{ row.problem }}</td>
+        <td>{{ row.wcag }}</td>
+        <td>{{ row.where }}</td>
+        <td>{{ row.fix }}</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<h2>Angular CDK A11y: mapa błędów i poprawek</h2>
+<table>
+  <caption class="visually-hidden">Błędy związane z CDK A11y, miejsce wystąpienia i sposób poprawienia</caption>
+  <thead>
+    <tr>
+      <th scope="col">Nr</th>
+      <th scope="col">Błąd</th>
+      <th scope="col">WCAG</th>
+      <th scope="col">Gdzie w wersji z błędami</th>
+      <th scope="col">Jak poprawiono</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of cdkRows; track row.no) {
+      <tr>
+        <th scope="row">{{ row.no }}</th>
+        <td>{{ row.problem }}</td>
+        <td>{{ row.wcag }}</td>
+        <td>{{ row.where }}</td>
+        <td>{{ row.fix }}</td>
+      </tr>
+    }
+  </tbody>
+</table>

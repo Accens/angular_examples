@@ -1,0 +1,65 @@
+<h1>Formularz – wersja z błędami</h1>
+<p class="lead">
+  Ta strona zawiera <strong>celowe błędy dostępności</strong> (punkty 1–9 z listy typowych pułapek
+  Reactive Forms). Lista błędów i ich poprawek jest na <a routerLink="/">stronie startowej</a>.
+</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2>Dane kontaktowe</h2>
+
+  <!-- #6: placeholder zamiast etykiety -->
+  <div class="field">
+    <input type="text" formControlName="fullName" placeholder="Imię i nazwisko" />
+  </div>
+
+  <!-- #1 błędy tylko po touched, #4 komunikat bez aria-describedby, aria-invalid i live region -->
+  <div class="field">
+    <label for="email">Adres e-mail</label>
+    <input id="email" type="email" formControlName="email" />
+    @if (form.controls.email.invalid && form.controls.email.touched) {
+      <p class="error-text">Niepoprawny adres e-mail</p>
+    }
+  </div>
+
+  <!-- #3: role="alert" na inline błędzie przy walidacji "na żywo" (na każdy znak) -->
+  <div class="field">
+    <label for="phone">Telefon</label>
+    <input id="phone" type="tel" formControlName="phone" />
+    @if (form.controls.phone.invalid && form.controls.phone.dirty) {
+      <p class="error-text" role="alert">
+        Niepoprawny numer telefonu (wpisano {{ phoneLength() }} znaków, wymagane co najmniej 9)
+      </p>
+    }
+  </div>
+
+  <!-- #8: etykieta wskazuje na host własnej kontrolki, która nie ma roli ani klawiatury -->
+  <div class="field">
+    <label for="topic">Temat</label>
+    <app-bad-select id="topic" [options]="topics" formControlName="topic" />
+  </div>
+
+  <h2>Adres</h2>
+
+  <!-- #9: ten sam komponent ze stałym id="field-input" użyty dwa razy
+       #5: błąd pokazany tylko kolorem ramki, bez tekstu i ikony -->
+  <app-bad-text-field label="Miejscowość" [invalid]="isInvalid('city')" formControlName="city" />
+  <app-bad-text-field label="Kod pocztowy" [invalid]="isInvalid('postcode')" formControlName="postcode" />
+
+  <!-- #7: pole wyłączone przez disabled – poza kolejnością tabulacji, nie trafia do form.value -->
+  <div class="field">
+    <label for="customer-no">Numer klienta</label>
+    <input id="customer-no" type="text" formControlName="customerNo" />
+  </div>
+
+  <div class="btn-row">
+    <button type="submit" class="btn">Wyślij</button>
+  </div>
+</form>
+
+<!-- #4: komunikat sukcesu dodany do DOM bez live region i bez przeniesienia fokusu -->
+@if (sent()) {
+  <div class="success-box">
+    <p>Formularz został wysłany.</p>
+    <pre>{{ result() }}</pre>
+  </div>
+}

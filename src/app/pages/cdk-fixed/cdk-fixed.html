@@ -1,0 +1,153 @@
+<h1>CDK A11y – wersja poprawiona</h1>
+<p class="lead">
+  Te same elementy co na stronie z błędami, po poprawkach (C1–C11). Opis każdej zmiany jest na
+  <a routerLink="/">stronie startowej</a>.
+</p>
+
+<!-- ============ 1. Dialog ============ -->
+<section aria-labelledby="s-dialog">
+  <h2 id="s-dialog" #filesHeading tabindex="-1">1. Dialog potwierdzenia</h2>
+  <p>Usuń plik i sprawdź, gdzie trafia fokus oraz czy dialog reaguje na Escape.</p>
+
+  <ul class="file-list">
+    @for (f of files(); track f.id) {
+      <li>
+        <span>{{ f.name }}</span>
+        <button
+          #deleteButton
+          type="button"
+          class="btn btn-secondary"
+          data-delete-button
+          (click)="openDeleteDialog(f, deleteButton)"
+        >
+          Usuń<span class="visually-hidden"> {{ f.name }}</span>
+        </button>
+      </li>
+    } @empty {
+      <li>Brak plików.</li>
+    }
+  </ul>
+  <button type="button" class="btn btn-secondary" (click)="resetFiles()">Przywróć listę</button>
+</section>
+
+<!-- ============ 2. Menu ============ -->
+<section aria-labelledby="s-menu">
+  <h2 id="s-menu">2. Menu rozwijane</h2>
+  <p>Strzałki, Home, End, wpisanie litery, Escape i Tab działają zgodnie ze wzorcem menu button.</p>
+
+  <div class="menu-wrap" (focusout)="onMenuFocusOut($event)">
+    <button
+      #menuTrigger
+      type="button"
+      class="btn btn-secondary"
+      id="actions-trigger"
+      aria-haspopup="menu"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="actions-menu"
+      (click)="toggleMenu()"
+      (keydown)="onTriggerKey($event)"
+    >
+      Akcje ▾
+    </button>
+    @if (menuOpen()) {
+      <ul id="actions-menu" class="menu" role="menu" aria-labelledby="actions-trigger" (keydown)="onMenuKey($event)">
+        @for (item of menuItems; track item) {
+          <li role="none">
+            <button type="button" appMenuItem (click)="chooseItem(item)">{{ item }}</button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+  @if (menuChoice()) {
+    <p class="hint">{{ menuChoice() }}</p>
+  }
+</section>
+
+<!-- ============ 3. Regiony aria-live ============ -->
+<section aria-labelledby="s-live">
+  <h2 id="s-live">3. Komunikaty i regiony aria-live</h2>
+
+  <h3>Komunikat o zapisie</h3>
+  <div class="btn-row">
+    <button type="button" class="btn" (click)="saveChanges()">Zapisz zmiany</button>
+    <button type="button" class="btn btn-secondary" (click)="clearStatus()">Wyczyść</button>
+  </div>
+  <!-- C6: kontener jest zawsze w DOM, a treść pojawia się w środku -->
+  <div role="status" class="message-slot">
+    @if (statusText()) {
+      <p class="msg">{{ statusText() }}</p>
+    }
+  </div>
+
+  <h3>Koszyk</h3>
+  <div class="btn-row">
+    <button type="button" class="btn" (click)="addToCart()">Dodaj do koszyka</button>
+  </div>
+  <!-- C7: tylko ten region ogłasza zmianę -->
+  <div role="status" class="message-slot">
+    @if (cartText()) {
+      <p class="msg">{{ cartText() }}</p>
+    }
+  </div>
+
+  <h3>Wyszukiwarka</h3>
+  <div class="field">
+    <label for="fruit-search">Szukaj owoców</label>
+    <input id="fruit-search" type="text" autocomplete="off" (input)="onSearch($event)" />
+  </div>
+  <!-- C8: liczba wyników jest ogłaszana raz, po przerwie w pisaniu -->
+  <ul class="search-results">
+    @for (f of results(); track f) {
+      <li>{{ f }}</li>
+    }
+  </ul>
+
+  <h3>Powiadomienie (toast)</h3>
+  <div class="btn-row">
+    <button type="button" class="btn" (click)="showToast()">Zapisz szkic</button>
+  </div>
+  <!-- C6 + C9: stały region; toast zostaje do zamknięcia przyciskiem -->
+  <div role="status" class="message-slot">
+    @if (toastVisible()) {
+      <div class="toast">
+        <span>Szkic został zapisany.</span>
+        <button type="button" (click)="dismissToast()">Zamknij</button>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ============ 4. Lista z @for ============ -->
+<section aria-labelledby="s-list">
+  <h2 id="s-list">4. Lista zadań (fokus przy aktualizacji DOM)</h2>
+  <p>Przejdź Tab do zadania i naciśnij Enter lub spację. Fokus pozostaje na tym samym przycisku.</p>
+  <ul class="task-list">
+    <!-- C10: track po stabilnym identyfikatorze – element jest zachowany, a fokus też -->
+    @for (t of tasks(); track t.id) {
+      <li>
+        <button type="button" [attr.aria-pressed]="t.done" (click)="toggleTask(t.id)">
+          {{ t.title }}
+        </button>
+      </li>
+    }
+  </ul>
+</section>
+
+<!-- ============ 5. Ukryty panel ============ -->
+<section aria-labelledby="s-panel">
+  <h2 id="s-panel">5. Panel rozwijany</h2>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [attr.aria-expanded]="panelOpen()"
+    aria-controls="details-panel"
+    (click)="togglePanel()"
+  >
+    Szczegóły
+  </button>
+  <!-- C11: atrybut hidden (display: none) usuwa panel z kolejności tabulacji i z drzewa dostępności -->
+  <div id="details-panel" class="panel" [hidden]="!panelOpen()">
+    <p>Więcej informacji znajdziesz w <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener">materiałach W3C WAI</a>.</p>
+  </div>
+</section>

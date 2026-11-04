@@ -1,0 +1,36 @@
+<a class="skip-link" href="#main" (click)="skipToMain($event)">Przejdź do treści głównej</a>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" routerLink="/">Błędy formularzy</a>
+    <nav aria-label="Główna">
+      <ul class="nav-list">
+        @for (item of navItems; track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="active"
+              ariaCurrentWhenActive="page"
+              [routerLinkActiveOptions]="{ exact: true }"
+              >{{ item.label }}</a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main" #main tabindex="-1" class="container main">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>Aplikacja demonstracyjna: ten sam formularz z celowymi błędami dostępności i po poprawkach.</p>
+  </div>
+</footer>
+
+<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+  {{ routeAnnouncement() }}
+</div>
